@@ -64,18 +64,17 @@ func solveP1(policyList []policy) int {
 	return valid
 }
 
-// func solveP2(intList []int) (int, error) {
-// 	for indexA, inputA := range intList {
-// 		for indexB, inputB := range intList {
-// 			for indexC, inputC := range intList {
-// 				if inputA+inputB+inputC == 2020 && indexA != indexB && indexA != indexC && indexC != indexB {
-// 					return inputA * inputB * inputC, nil
-// 				}
-// 			}
-// 		}
-// 	}
-// 	return -1, errors.New("Cannot find solution")
-// }
+func solveP2(policyList []policy) int {
+	valid := 0
+	for _, policy := range policyList {
+		minExists := string([]byte{policy.password[policy.min-1]}) == policy.char
+		maxExists := string([]byte{policy.password[policy.max-1]}) == policy.char
+		if (minExists && !maxExists) || (maxExists && !minExists) {
+			valid = valid + 1
+		}
+	}
+	return valid
+}
 
 func main() {
 	fmt.Println("Solving Part One!")
@@ -86,14 +85,14 @@ func main() {
 	p1Solution := solveP1(p1Input)
 	fmt.Println(p1Solution)
 
-	// fmt.Println("Solving Part Two!")
-	// p2Input, err := readInput("input1.txt")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// p2Solution, err := solveP2(p2Input)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(p2Solution)
+	fmt.Println("Solving Part Two!")
+	p2Input, err := readInput("input.txt")
+	if err != nil {
+		panic(err)
+	}
+	p2Solution := solveP2(p2Input)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(p2Solution)
 }
