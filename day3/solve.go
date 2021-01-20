@@ -6,13 +6,6 @@ import (
 	"strings"
 )
 
-type policy struct {
-	min      int
-	max      int
-	char     string //change to byte maybe?
-	password string
-}
-
 func readInput(filename string) (returnStrings []string, err error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -44,17 +37,29 @@ func solveP1(stringList []string) int {
 	return treesHit
 }
 
-// func solveP2(policyList []policy) int {
-// 	valid := 0
-// 	for _, policy := range policyList {
-// 		minExists := string([]byte{policy.password[policy.min-1]}) == policy.char
-// 		maxExists := string([]byte{policy.password[policy.max-1]}) == policy.char
-// 		if (minExists && !maxExists) || (maxExists && !minExists) {
-// 			valid = valid + 1
-// 		}
-// 	}
-// 	return valid
-// }
+func checkSlope(stringList []string, slopeX int, slopeY int) int {
+	treesHit := 0
+	depth := 0
+	distance := 0
+	for depth < len(stringList) {
+		if stringList[depth][distance] == '#' {
+			treesHit = treesHit + 1 //ow!
+		}
+		distance = (distance + slopeX) % len(stringList[0])
+		depth = depth + slopeY
+	}
+	return treesHit
+}
+
+func solveP2(stringList []string) int {
+	totalHit := 1
+	totalHit = totalHit * checkSlope(stringList, 1, 1)
+	totalHit = totalHit * checkSlope(stringList, 3, 1)
+	totalHit = totalHit * checkSlope(stringList, 5, 1)
+	totalHit = totalHit * checkSlope(stringList, 7, 1)
+	totalHit = totalHit * checkSlope(stringList, 1, 2)
+	return totalHit
+}
 
 func main() {
 	fmt.Println("Solving Part One!")
@@ -65,14 +70,14 @@ func main() {
 	p1Solution := solveP1(p1Input)
 	fmt.Println(p1Solution)
 
-	// fmt.Println("Solving Part Two!")
-	// p2Input, err := readInput("input.txt")
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// p2Solution := solveP2(p2Input)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// fmt.Println(p2Solution)
+	fmt.Println("Solving Part Two!")
+	p2Input, err := readInput("input.txt")
+	if err != nil {
+		panic(err)
+	}
+	p2Solution := solveP2(p2Input)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(p2Solution)
 }
