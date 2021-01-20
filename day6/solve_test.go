@@ -38,4 +38,35 @@ b`, 11},
 	}
 }
 
-/* Part two doesn't have test input */
+func TestSolveP2(t *testing.T) {
+	var tests = []struct {
+		input string
+		want  int
+	}{
+		{
+			`abc
+
+a
+b
+c
+
+ab
+ac
+
+a
+a
+a
+a
+
+b`, 6},
+	}
+	for _, test := range tests {
+		testname := fmt.Sprintf("%s", test.input)
+		t.Run(testname, func(t *testing.T) {
+			ans := solveP2(test.input)
+			if ans != test.want {
+				t.Errorf("got %d, want %d", ans, test.want)
+			}
+		})
+	}
+}
