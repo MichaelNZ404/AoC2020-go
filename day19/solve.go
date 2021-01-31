@@ -127,14 +127,78 @@ func solveP1(inputString string) int {
 	return validMessageCount
 }
 
+func buildRegexMap(ruleMapRaw map[string]string, ruleRegexMap map[string]string, ruleNumber string) {
+	ruleString := ruleMapRaw[ruleNumber]
+	if ruleString == `"a"` {
+		ruleRegexMap[ruleNumber] = "a"
+		return
+	}
+	if ruleString == `"b"` {
+		ruleRegexMap[ruleNumber] = "b"
+		return
+	}
+
+	parsedRules := ""
+	ruleOptions := strings.Split(ruleString, " | ")
+	for _, ruleOption := range ruleOptions {
+		subrules := strings.Split(ruleOption, " ")
+		ruleOptionResults := ""
+		for _, subrule := range subrules {
+			if ruleRegexMap[subrule] == "" {
+				buildRegexMap(ruleMapRaw, ruleRegexMap, subrule)
+			}
+			subruleResults := ruleRegexMap[subrule]
+			ruleOptionResults = ruleOptionResults + subruleResults
+		}
+		if len(parsedRules) == 0 {
+			parsedRules = "(?:" + ruleOptionResults + ")"
+		} else {
+			parsedRules = parsedRules + "|(?:" + ruleOptionResults + ")"
+		}
+	}
+	ruleRegexMap[ruleNumber] = "(?:" + parsedRules + ")"
+}
+
+// our tree structure is fast once built, but blows up in memory complexity.
+// two options are to build the tree in place, which would involve lots of zipping and node traversal, or switch to regex
+func solveP2(inputString string) int {
+	sections := strings.Split(inputString, "\n\n")
+
+	ruleMapRaw := make(map[string]string)
+	r, _ := regexp.Compile(`^(\d+): (.+)$`)
+	for _, rule := range strings.Split(sections[0], "\n") {
+		ruleNumber := r.FindStringSubmatch(rule)[1]
+		rule := r.FindStringSubmatch(rule)[2]
+		ruleMapRaw[ruleNumber] = rule
+	}
+
+	// We can leverage the fact we know the inputs are of trivial length to manually code in a reasonable loop length
+	ruleMapRaw["8"] = "42 | 42 42 | 42 42 42 | 42 42 42 42 | 42 42 42 42 42 | 42 42 42 42 42 42 | 42 42 42 42 42 42 42"
+	ruleMapRaw["11"] = "42 31 | 42 42 31 31 | 42 42 42 31 31 31 | 42 42 42 42 31 31 31 31 | 42 42 42 42 42 31 31 31 31 31"
+
+	// build regex
+	ruleRegexMap := make(map[string]string)
+	buildRegexMap(ruleMapRaw, ruleRegexMap, "0")
+	ruleRegexString := "^" + ruleRegexMap["0"] + "$"
+
+	ruleRegex, _ := regexp.Compile(ruleRegexString)
+	validMessageCount := 0
+	for _, message := range strings.Split(sections[1], "\n") {
+		if ruleRegex.MatchString(message) {
+			validMessageCount++
+		}
+	}
+	return validMessageCount
+}
+
 func main() {
 	fmt.Println("Solving Part One!")
 	p1Input := readInput("input.txt")
 	p1Solution := solveP1(p1Input)
 	fmt.Println(p1Solution)
 
-	// fmt.Println("Solving Part Two!")
-	// p2Input := readInput("input.txt")
-	// p2Solution := solveP2(p2Input)
-	// fmt.Println(p2Solution)
+	fmt.Println("Solving Part Two!")
+	p2Input := readInput("input.txt")
+	p2Solution := solveP2(p2Input)
+	fmt.Println(p2Solution)
 }
